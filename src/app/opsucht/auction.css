@@ -14,30 +14,84 @@
     color: #e6e6e6;
     box-shadow: 0 6px 20px rgba(0,0,0,0.6);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
+
+.auction-icon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    background: #111;
+    border-radius: 8px;
+}
+
 
 .auction-card:hover {
     transform: translateY(-6px) scale(1.04);
     box-shadow: 0 12px 32px rgba(0,0,0,0.9);
 }
 
-.auction-card img {
+.auction-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auction-header img {
     width: 64px;
     height: 64px;
-    display: block;
-    margin: 0 auto 10px;
+    border-radius: 8px;
+    object-fit: contain;
     filter: drop-shadow(0 0 6px rgba(255,255,255,0.2));
 }
 
-.title {
+.auction-title p {
+    margin: 0;
     font-weight: 600;
-    text-align: center;
-    margin-bottom: 6px;
+
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+
+    overflow-wrap: break-word;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
+
+
+
+.auction-title p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.ending-soon {
+    color: #ff4d4d;
+    font-weight: 700;
+}
+
 
 .muted {
     font-size: 13px;
     opacity: 0.75;
+}
+
+.auction-info-box {
+    background-color: #1a1d24;
+    border-radius: 12px;
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .start {
@@ -51,12 +105,29 @@
     color: #6cff9a;
 }
 
+.use-client-btn {
+    margin-top: 6px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 12px;
+    background-color: #3a7cff;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.use-client-btn:hover {
+    background-color: #2a5fcc;
+}
+
+/* Kategorie Switcher & Summe */
 .categorySwitcher {
-    appearance: none;          /* native Pfeile ausblenden */
+    appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-color: #1a1d24; /* dunkler Hintergrund */
-    color: #e6e6e6;           /* Textfarbe */
+    background-color: #1a1d24;
+    color: #e6e6e6;
     border: 1px solid #444;
     border-radius: 8px;
     padding: 6px 12px;
@@ -68,7 +139,6 @@
     background-position: right 10px center;
 }
 
-
 .sumMoney {
     display: flex;
     align-items: center;
@@ -79,10 +149,63 @@
     font-weight: 600;
 }
 
+.searchBar{
+    display: flex;
+    padding: 6px 10px;
+    border-radius: 12px;
+    background-color: #d6d6d6;
+}
 
 .top-bar {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 0 25px;
+}
+
+@media (max-width: 500px) {
+    .auction-card {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .auction-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .auction-title {
+        align-items: center;
+        text-align: center;
+    }
+
+    .auction-info-box {
+        font-size: 13px;
+    }
+}
+
+
+@keyframes blink {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+    25%, 75% {
+        opacity: 0;
+    }
+}
+
+
+.ending-soon-card {
+    border: 2px solid #ff4d4d;
+    animation: pulse-card 1s infinite;
+    border-radius: 30px; /* passt zu deiner .auction-card */
+}
+
+@keyframes pulse-card {
+    0%, 100% {
+        box-shadow: 0 0 6px #ff4d4d;
+    }
+    50% {
+        box-shadow: 0 0 14px #ff4d4d;
+    }
 }

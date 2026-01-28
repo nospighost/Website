@@ -38,7 +38,7 @@ export default function NavigationBar() {
                             pathname === "/opsucht" ? "active" : ""
                         }`}
                     >
-                        Auction
+                        Auktionen
                     </Link>
                 </li>
 

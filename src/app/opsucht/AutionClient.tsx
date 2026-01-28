@@ -1,7 +1,7 @@
 'use client'
 
 import React, {useEffect, useState} from 'react'
-import {Page} from "@/app/opsucht/page";
+import {Item, Page} from "@/app/opsucht/page";
 
 
 
@@ -9,13 +9,14 @@ const AuctionClient = ({ auction }: { auction: Page[] }) => {
     const [category, setCategory] = useState('*')
     const [sumMoney, setSumMoney] = useState('')
     const [now, setNow] = useState(Date.now())
+    const [sortBy, setSortBy] = useState<"endTimeAsc" | "endTimeDesc" | "currentBidAsc" | "currentBidDesc">("endTimeAsc");
+    const [search, setSearch] = useState("");
+
 
     useEffect(() => {
         const interval = setInterval(() => {
             setNow(Date.now())
         }, 1000)
-
-
 
 
         return() => clearInterval(interval)
@@ -31,10 +32,44 @@ const AuctionClient = ({ auction }: { auction: Page[] }) => {
         setSumMoney(getFormatedSummary(sumWithInitial))
     }, [category])
 
+
+    const checkIconExists = async (url: string): Promise<boolean> => {
+        try {
+            const res = await fetch(url, { method: 'HEAD' });
+            return res.ok;
+        } catch {
+            return false;
+        }
+    };
+
+
     const filtered = auction.filter(a => {
         if (category === '*') return true
         return a.category === category
     })
+
+    const sortedFiltered = filtered.sort((a, b) => {
+        switch(sortBy) {
+            case "endTimeAsc":
+                return new Date(a.endTime).getTime() - new Date(b.endTime).getTime();
+            case "endTimeDesc":
+                return new Date(b.endTime).getTime() - new Date(a.endTime).getTime();
+            case "currentBidAsc":
+                return a.currentBid - b.currentBid;
+            case "currentBidDesc":
+                return b.currentBid - a.currentBid;
+            default:
+                return 0;
+        }
+    });
+
+    const searched = sortedFiltered.filter(a => {
+        const name =
+            (a.item.displayName || a.item.material).toLowerCase();
+
+        return name.includes(search.toLowerCase());
+    });
+
 
 
     const getFormatedSummary = (value: number) => {
@@ -51,6 +86,23 @@ const AuctionClient = ({ auction }: { auction: Page[] }) => {
         }
 
     }
+
+
+
+    const getItemIcon = (item: Item): string => {
+        if (item.icon && item.icon.trim() !== "") {
+            return item.icon;
+        }
+
+        const normalized = item.displayName
+            .toLowerCase()
+            .replace(/\s+/g, "_")
+            .replace(/[^a-z0-9_]/g, "");
+
+        return `/custom-items/${normalized}.png`;
+    };
+
+
 
     return (
         <>
@@ -69,44 +121,78 @@ const AuctionClient = ({ auction }: { auction: Page[] }) => {
                 <option value="other">Sonstiges</option>
             </select>
 
-            <h2 className={"sumMoney"}>{sumMoney}</h2>
+                <select
+                    className="categorySwitcher"
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as any)}
+                >
+                    <option value="currentBidDesc">Teuerste zuerst</option>
+                    <option value="currentBidAsc">Billigste zuerst</option>
+                    <option value="endTimeAsc">Endet zuerst</option>
+                    <option value="endTimeDesc">Endet zuletzt</option>
+                </select>
+
+
+                <h2 className={"sumMoney"}>{sumMoney}</h2>
+
+
+                <input
+                    className={"searchBar"}
+                    type="text"
+                    placeholder="Item suchen…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+
 
             </div>
-
 
             <div className="auction-grid">
-                {filtered.map((a, id) => (
-                    <div key={id} className="auction-card">
+                {searched.map((a, id) => {
+                    const remainingSeconds = Number(getRemainingSeconds(a));
 
-                        <div>
-                        <img src={a.item.icon} alt={a.item.displayName} />
-                        <p className="title">{a.item.displayName}</p>
+                    return (
+                        <div
+                            key={id}
+                            className={`auction-card ${remainingSeconds < 120 ? "ending-soon-card" : ""}`}
+                        >
+                            <div className="auction-header">
+                                <img
+                                    loading={"lazy"}
+                                    src={getItemIcon(a.item)}
+                                    onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = "/custom-items/default.png";
+                                    }}
+                                    alt={a.item.displayName || a.item.material}
+                                    className="auction-icon"
+                                />
+
+                                <div className="auction-title">
+                                    <p lang={"de"}>{a.item.displayName || a.item.material}</p>
+                                    {a.item.amount > 1 && <p className="muted">Menge: {a.item.amount}</p>}
+                                </div>
+                            </div>
+
+                            <div className="auction-info-box">
+                                <p>Start: {a.startBid?.toLocaleString('de-de', { minimumFractionDigits: 2 })}</p>
+                                <p>Aktuell: {a.currentBid?.toLocaleString('de-de', { minimumFractionDigits: 2 })}</p>
+                                <p>Endet in: {getRemainingTime(a)}</p>
+                            </div>
+
+                            <button className="use-client-btn">Informationen</button>
                         </div>
-
-
-                        {a.item.amount > 1 && (
-                            <p className="muted">Menge: {a.item.amount}</p>
-                        )}
-
-                        <p className="start">
-                            Start: {a.startBid?.toLocaleString('de-de', { minimumFractionDigits: 2 })}
-                        </p>
-
-                        <p className="current">
-                            Aktuell: {a.currentBid?.toLocaleString('de-de', { minimumFractionDigits: 2 })}
-                        </p>
-
-                            <p>
-                            Endet in: {getRemainingTime(a)}
-                            </p>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
+
+
+
+
         </>
     )
 }
 
-const getRemainingTime = (a: Page) => {
+const getRemainingTime  = (a: Page) => {
     const end = new Date(a.endTime).getTime()
     const now = Date.now()
 
@@ -130,6 +216,16 @@ const getRemainingTime = (a: Page) => {
 
     return `${minutes}m ${seconds}s`
 
+}
+
+const getRemainingSeconds = (a: Page): string => {
+    const end = new Date(a.endTime).getTime()
+    const now = Date.now()
+
+    const diff = end - now
+    const totalSeconds = Math.floor(diff / 1000)
+
+    return totalSeconds.toString()
 }
 
 export default AuctionClient
