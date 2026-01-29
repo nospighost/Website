@@ -1,11 +1,15 @@
 .navbar {
-    background-color: #111;
-    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    height: 60px;
+    padding: 0 24px;
+    background-color: #0f172a;
 }
 
 .list {
     display: flex;
-    justify-content: center;
     gap: 20px;
     list-style: none;
     margin: 0;
@@ -13,12 +17,18 @@
 }
 
 .link {
-    color: white;
+    color: #cbd5f5;
     text-decoration: none;
     font-size: 18px;
+    font-weight: 500;
     position: relative;
 
     transition: color 0.3s ease;
+}
+
+.link:hover {
+    color: white;
+    animation: glowPulse 1.5s infinite;
 }
 
 .link::after {
@@ -34,17 +44,35 @@
     transition: width 0.3s ease;
 }
 
-
-.link:hover::after {
-    width: 100%;
-}
+.link:hover::after,
 .active::after {
     width: 100%;
 }
 
-
-.link:hover {
-    animation: glowPulse 1.5s infinite;
+.active {
+    color: white;
 }
 
+.right {
+    display: flex;
+    align-items: center;
+}
 
+.loginIcon {
+    font-size: 22px;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+
+    transition: transform 0.2s ease;
+}
+
+.loginIcon:hover {
+    transform: scale(1.15);
+}
+
+@keyframes glowPulse {
+    0% { text-shadow: 0 0 5px #00ffff; }
+    50% { text-shadow: 0 0 15px #00ffff; }
+    100% { text-shadow: 0 0 5px #00ffff; }
+}
